@@ -15,7 +15,7 @@ exports.createCard = async (req, res) => {
     const card = await Card.create({ name, link, owner: req.user._id });
     res.status(201).json(card);
   } catch (error) {
-    res.status(400).json({ message: 'Bad Request' });
+    res.status(400).json({ message: 'Переданы некорректные данные при создании карточки' });
   }
 };
 
@@ -27,7 +27,7 @@ exports.deleteCard = async (req, res) => {
       owner: req.user._id,
     });
     if (!deletedCard) {
-      return res.status(404).json({ message: 'Запрашиваемая карточка не найдена' });
+      return res.status(404).json({ message: 'Карточка не найдена' });
     }
     return res.json(deletedCard);
   } catch (error) {
@@ -46,7 +46,7 @@ exports.likeCard = async (req, res) => {
       { new: true },
     );
     if (!updatedCard) {
-      return res.status(404).json({ message: 'Запрашиваемая карточка не найдена' });
+      return res.status(404).json({ message: 'Карточка не найдена' });
     }
     return res.json(updatedCard);
   } catch (error) {
@@ -65,7 +65,7 @@ exports.unlikeCard = async (req, res) => {
       { new: true },
     );
     if (!updatedCard) {
-      return res.status(404).json({ message: 'Запрашиваемая карточка не найдена' });
+      return res.status(404).json({ message: 'Карточка не найдена' });
     }
     return res.json(updatedCard);
   } catch (error) {

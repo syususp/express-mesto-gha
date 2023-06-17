@@ -15,9 +15,7 @@ exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      return res
-        .status(500)
-        .json({ message: 'Запрашиваемый пользователь не найден' });
+      return res.status(404).json({ message: 'Пользователь не найден' });
     }
 
     return res.json(user);
@@ -33,7 +31,7 @@ exports.createUser = async (req, res) => {
     const user = await User.create({ name, about, avatar });
     res.json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка сервера' });
+    res.status(400).json({ message: 'Переданы некорректные данные при создании пользователя' });
   }
 };
 
@@ -48,7 +46,7 @@ exports.updateProfile = async (req, res) => {
       { new: true },
     );
     if (!updatedUser) {
-      return res.status(404).json({ message: 'Запрашиваемый пользователь не найден' });
+      return res.status(404).json({ message: 'Пользователь не найден' });
     }
     return res.json(updatedUser);
   } catch (error) {
@@ -67,7 +65,7 @@ exports.updateAvatar = async (req, res) => {
       { new: true },
     );
     if (!updatedUser) {
-      return res.status(404).json({ message: 'Запрашиваемый пользователь не найден' });
+      return res.status(404).json({ message: 'Пользователь не найден' });
     }
     return res.json(updatedUser);
   } catch (error) {
