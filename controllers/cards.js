@@ -1,11 +1,11 @@
-const {
-  HTTP_STATUS_CREATED,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-} = require('http2');
 const mongoose = require('mongoose');
 const Card = require('../models/card');
+const {
+  SERVER_ERROR,
+  NOT_FOUND,
+  BAD_REQUEST,
+  CREATED,
+} = require('../constants/errorStatuses');
 
 exports.getCards = async (req, res) => {
   try {
@@ -13,7 +13,7 @@ exports.getCards = async (req, res) => {
     res.json(cards);
   } catch (error) {
     res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .status(SERVER_ERROR)
       .json({ message: 'Ошибка сервера' });
   }
 };
@@ -22,15 +22,15 @@ exports.createCard = async (req, res) => {
   const { name, link } = req.body;
   try {
     const card = await Card.create({ name, link, owner: req.user._id });
-    return res.status(HTTP_STATUS_CREATED).json(card);
+    return res.status(CREATED).json(card);
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       return res
-        .status(HTTP_STATUS_BAD_REQUEST)
+        .status(BAD_REQUEST)
         .json({ message: 'Ошибка валидации' });
     }
     return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .status(SERVER_ERROR)
       .json({ message: 'Ошибка сервера' });
   }
 };
@@ -45,7 +45,7 @@ exports.deleteCard = async (req, res) => {
 
     if (!deletedCard) {
       return res
-        .status(HTTP_STATUS_NOT_FOUND)
+        .status(NOT_FOUND)
         .json({ message: 'Карточка не найдена' });
     }
 
@@ -53,17 +53,15 @@ exports.deleteCard = async (req, res) => {
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       return res
-        .status(HTTP_STATUS_BAD_REQUEST)
+        .status(BAD_REQUEST)
         .json({ message: 'Ошибка валидации' });
     }
     if (error instanceof mongoose.Error.CastError) {
       return res
-        .status(HTTP_STATUS_BAD_REQUEST)
+        .status(BAD_REQUEST)
         .json({ message: 'Ошибка ID карточки' });
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .json({ message: 'Ошибка сервера' });
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
 
@@ -80,7 +78,7 @@ exports.likeCard = async (req, res) => {
 
     if (!updatedCard) {
       return res
-        .status(HTTP_STATUS_NOT_FOUND)
+        .status(NOT_FOUND)
         .json({ message: 'Карточка не найдена' });
     }
 
@@ -88,16 +86,16 @@ exports.likeCard = async (req, res) => {
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       return res
-        .status(HTTP_STATUS_BAD_REQUEST)
+        .status(BAD_REQUEST)
         .json({ message: 'Ошибка валидации' });
     }
     if (error instanceof mongoose.Error.CastError) {
       return res
-        .status(HTTP_STATUS_BAD_REQUEST)
+        .status(BAD_REQUEST)
         .json({ message: 'Ошибка ID карточки' });
     }
     return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .status(SERVER_ERROR)
       .json({ message: 'Ошибка сервера' });
   }
 };
@@ -115,7 +113,7 @@ exports.unlikeCard = async (req, res) => {
 
     if (!updatedCard) {
       return res
-        .status(HTTP_STATUS_NOT_FOUND)
+        .status(NOT_FOUND)
         .json({ message: 'Карточка не найдена' });
     }
 
@@ -123,16 +121,16 @@ exports.unlikeCard = async (req, res) => {
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       return res
-        .status(HTTP_STATUS_BAD_REQUEST)
+        .status(BAD_REQUEST)
         .json({ message: 'Ошибка валидации' });
     }
     if (error instanceof mongoose.Error.CastError) {
       return res
-        .status(HTTP_STATUS_BAD_REQUEST)
+        .status(BAD_REQUEST)
         .json({ message: 'Ошибка ID карточки' });
     }
     return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .status(SERVER_ERROR)
       .json({ message: 'Ошибка сервера' });
   }
 };
