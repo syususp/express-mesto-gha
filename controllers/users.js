@@ -1,39 +1,76 @@
-/* eslint-disable no-unused-vars */
 const User = require('../models/user');
 
-exports.getUsers = (req, res) => {
-  User.find()
-    .then((users) => {
-      res.json(users);
-    })
-    .catch((err) => {
-      res.status(500).json({ message: 'Internal Server Error' });
-    });
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка сервера' });
+  }
 };
 
-exports.getUserById = (req, res) => {
+exports.getUserById = async (req, res) => {
   const { userId } = req.params;
 
-  User.findById(userId)
-    .then((user) => {
-      if (!user) {
-        return res.status(500).json({ message: 'User not found' });
-      }
-      return res.json(user);
-    })
-    .catch((err) => {
-      res.status(500).json({ message: 'Internal Server Error' });
-    });
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(500)
+        .json({ message: 'Запрашиваемый пользователь не найден' });
+    }
+
+    return res.json(user);
+  } catch (error) {
+    return res.status(500).json({ message: 'Ошибка сервера' });
+  }
 };
 
-exports.createUser = (req, res) => {
+exports.createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => {
-      res.json(user);
-    })
-    .catch((err) => {
-      res.status(500).json({ message: 'Internal Server Error' });
-    });
+  try {
+    const user = await User.create({ name, about, avatar });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка сервера' });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  const { name, about } = req.body;
+  const userId = req.user._id;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { name, about },
+      { new: true },
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'Запрашиваемый пользователь не найден' });
+    }
+    return res.json(updatedUser);
+  } catch (error) {
+    return res.status(500).json({ message: 'Ошибка сервера' });
+  }
+};
+
+exports.updateAvatar = async (req, res) => {
+  const { avatar } = req.body;
+  const userId = req.user._id;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { avatar },
+      { new: true },
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'Запрашиваемый пользователь не найден' });
+    }
+    return res.json(updatedUser);
+  } catch (error) {
+    return res.status(500).json({ message: 'Ошибка сервера' });
+  }
 };
