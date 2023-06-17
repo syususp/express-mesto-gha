@@ -26,4 +26,4 @@ app.use((req, res, next) => {
 app.use(userRoutes);
 app.use(cardRoutes);
 
-app.listen(3001);
+app.listen(3000);
