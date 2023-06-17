@@ -50,7 +50,7 @@ exports.likeCard = async (req, res) => {
     }
     return res.json(updatedCard);
   } catch (error) {
-    return res.status(500).json({ message: 'Ошибка сервера' });
+    return res.status(400).json({ message: 'Переданы некорректные данные для постановки лайка' });
   }
 };
 
@@ -69,6 +69,6 @@ exports.unlikeCard = async (req, res) => {
     }
     return res.json(updatedCard);
   } catch (error) {
-    return res.status(500).json({ message: 'Ошибка сервера' });
+    return res.status(400).json({ message: 'Переданы некорректные данные для снятия лайка' });
   }
 };

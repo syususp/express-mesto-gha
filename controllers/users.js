@@ -50,7 +50,7 @@ exports.updateProfile = async (req, res) => {
     }
     return res.json(updatedUser);
   } catch (error) {
-    return res.status(500).json({ message: 'Ошибка сервера' });
+    return res.status(400).json({ message: 'Переданы некорректные данные при обновлении профиля' });
   }
 };
 
@@ -69,6 +69,6 @@ exports.updateAvatar = async (req, res) => {
     }
     return res.json(updatedUser);
   } catch (error) {
-    return res.status(500).json({ message: 'Ошибка сервера' });
+    return res.status(400).json({ message: 'Переданы некорректные данные при обновлении аватара' });
   }
 };
