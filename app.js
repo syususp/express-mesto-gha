@@ -26,4 +26,8 @@ app.use((req, res, next) => {
 app.use(userRoutes);
 app.use(cardRoutes);
 
+app.use((req, res) => {
+  res.status(404).json({ message: 'Ошибка запроса' });
+});
+
 app.listen(3000);

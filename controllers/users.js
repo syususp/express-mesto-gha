@@ -12,10 +12,14 @@ exports.getUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
   const { userId } = req.params;
 
+  if (!userId) {
+    return res.status(400).json({ message: 'Некорректный ID пользователя' });
+  }
+
   try {
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'Пользователь не найден' });
+      return res.status(400).json({ message: 'Пользователь не найден' });
     }
 
     return res.json(user);

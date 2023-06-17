@@ -31,7 +31,7 @@ exports.deleteCard = async (req, res) => {
     }
     return res.json(deletedCard);
   } catch (error) {
-    return res.status(500).json({ message: 'Ошибка сервера' });
+    return res.status(400).json({ message: 'Некорретный ID карточки' });
   }
 };
 
