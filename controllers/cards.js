@@ -1,3 +1,10 @@
+const {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+} = require('http2');
+const mongoose = require('mongoose');
 const Card = require('../models/card');
 
 exports.getCards = async (req, res) => {
@@ -5,7 +12,9 @@ exports.getCards = async (req, res) => {
     const cards = await Card.find();
     res.json(cards);
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка сервера' });
+    res
+      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .json({ message: 'Ошибка сервера' });
   }
 };
 
@@ -13,11 +22,16 @@ exports.createCard = async (req, res) => {
   const { name, link } = req.body;
   try {
     const card = await Card.create({ name, link, owner: req.user._id });
-    res.status(201).json(card);
+    return res.status(HTTP_STATUS_CREATED).json(card);
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: 'Переданы некорректные данные при создании карточки' });
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка валидации' });
+    }
+    return res
+      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .json({ message: 'Ошибка сервера' });
   }
 };
 
@@ -30,12 +44,26 @@ exports.deleteCard = async (req, res) => {
     });
 
     if (!deletedCard) {
-      return res.status(404).json({ message: 'Карточка не найдена' });
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: 'Карточка не найдена' });
     }
 
     return res.json(deletedCard);
   } catch (error) {
-    return res.status(400).json({ message: 'Некорретный ID карточки' });
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка валидации' });
+    }
+    if (error instanceof mongoose.Error.CastError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка ID карточки' });
+    }
+    return res
+      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .json({ message: 'Ошибка сервера' });
   }
 };
 
@@ -47,18 +75,30 @@ exports.likeCard = async (req, res) => {
     const updatedCard = await Card.findByIdAndUpdate(
       cardId,
       { $addToSet: { likes: userId } },
-      { new: true },
+      { new: true, runValidators: true },
     );
 
     if (!updatedCard) {
-      return res.status(404).json({ message: 'Карточка не найдена' });
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: 'Карточка не найдена' });
     }
 
     return res.json(updatedCard);
   } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка валидации' });
+    }
+    if (error instanceof mongoose.Error.CastError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка ID карточки' });
+    }
     return res
-      .status(400)
-      .json({ message: 'Переданы некорректные данные для постановки лайка' });
+      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .json({ message: 'Ошибка сервера' });
   }
 };
 
@@ -70,15 +110,29 @@ exports.unlikeCard = async (req, res) => {
     const updatedCard = await Card.findByIdAndUpdate(
       cardId,
       { $pull: { likes: userId } },
-      { new: true },
+      { new: true, runValidators: true },
     );
+
     if (!updatedCard) {
-      return res.status(404).json({ message: 'Карточка не найдена' });
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: 'Карточка не найдена' });
     }
+
     return res.json(updatedCard);
   } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка валидации' });
+    }
+    if (error instanceof mongoose.Error.CastError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка ID карточки' });
+    }
     return res
-      .status(400)
-      .json({ message: 'Переданы некорректные данные для снятия лайка' });
+      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .json({ message: 'Ошибка сервера' });
   }
 };

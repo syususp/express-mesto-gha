@@ -1,3 +1,9 @@
+const {
+  HTTP_STATUS_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_BAD_REQUEST,
+} = require('http2');
+const mongoose = require('mongoose');
 const User = require('../models/user');
 
 exports.getUsers = async (req, res) => {
@@ -5,26 +11,44 @@ exports.getUsers = async (req, res) => {
     const users = await User.find();
     res.json(users);
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка сервера' });
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(HTTP_STATUS_BAD_REQUEST).json({ message: 'Ошибка валидации' });
+    } else {
+      res.status(HTTP_STATUS_SERVER_ERROR).json({ message: 'Ошибка сервера' });
+    }
   }
 };
 
 exports.getUserById = async (req, res) => {
   const { userId } = req.params;
 
-  if (!userId) {
-    return res.status(404).json({ message: 'Пользователь не найден' });
-  }
-
   try {
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'Пользователь не найден' });
-    }
-
+    const user = await User.findById(userId).orFail(
+      new mongoose.Error.DocumentNotFoundError(),
+    );
     return res.json(user);
   } catch (error) {
-    return res.status(400).json({ message: 'Ошибка сервера' });
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка валидации' });
+    }
+
+    if (error instanceof mongoose.Error.CastError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка ID пользователя' });
+    }
+
+    if (error instanceof mongoose.Error.DocumentNotFoundError) {
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: 'Пользователь не найден' });
+    }
+
+    return res
+      .status(HTTP_STATUS_SERVER_ERROR)
+      .json({ message: 'Ошибка сервера' });
   }
 };
 
@@ -33,11 +57,16 @@ exports.createUser = async (req, res) => {
 
   try {
     const user = await User.create({ name, about, avatar });
-    res.json(user);
+    return res.json(user);
   } catch (error) {
-    res.status(400).json({
-      message: 'Переданы некорректные данные при создании пользователя',
-    });
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка валидации' });
+    }
+    return res
+      .status(HTTP_STATUS_SERVER_ERROR)
+      .json({ message: 'Ошибка сервера' });
   }
 };
 
@@ -45,42 +74,53 @@ exports.updateProfile = async (req, res) => {
   const { name, about } = req.body;
   const userId = req.user._id;
 
-  if (!name || name.length < 2) {
-    return res.status(400).json({ message: 'Некорректное имя пользователя' });
-  }
-
-  if (name && name.length > 30) {
-    return res
-      .status(400)
-      .json({ message: 'Слишком длинное имя пользователя' });
-  }
-
-  if (about && about.length < 2) {
-    return res
-      .status(400)
-      .json({ message: 'Некорректная информация о пользователе' });
-  }
-
-  if (about && about.length > 30) {
-    return res
-      .status(400)
-      .json({ message: 'Слишком длинная информация о пользователе' });
-  }
-
   try {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { name, about },
-      { new: true },
+      { new: true, runValidators: true },
     );
+
     if (!updatedUser) {
-      return res.status(404).json({ message: 'Пользователь не найден' });
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: 'Пользователь не найден' });
     }
+
+    if (!name || name.length < 2) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Некорректное имя пользователя' });
+    }
+
+    if (name && name.length > 30) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Слишком длинное имя пользователя' });
+    }
+
+    if (about && about.length < 2) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Некорректная информация о пользователе' });
+    }
+
+    if (about && about.length > 30) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Слишком длинная информация о пользователе' });
+    }
+
     return res.json(updatedUser);
   } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка валидации' });
+    }
     return res
-      .status(400)
-      .json({ message: 'Переданы некорректные данные при обновлении профиля' });
+      .status(HTTP_STATUS_SERVER_ERROR)
+      .json({ message: 'Ошибка сервера' });
   }
 };
 
@@ -92,15 +132,22 @@ exports.updateAvatar = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { avatar },
-      { new: true },
+      { new: true, runValidators: true },
     );
     if (!updatedUser) {
-      return res.status(404).json({ message: 'Пользователь не найден' });
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: 'Пользователь не найден' });
     }
     return res.json(updatedUser);
   } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: 'Ошибка валидации' });
+    }
     return res
-      .status(400)
-      .json({ message: 'Переданы некорректные данные при обновлении аватара' });
+      .status(HTTP_STATUS_SERVER_ERROR)
+      .json({ message: 'Ошибка сервера' });
   }
 };

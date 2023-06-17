@@ -1,8 +1,7 @@
 /* eslint-disable no-console */
 const express = require('express');
 const mongoose = require('mongoose');
-const userRoutes = require('./routes/users');
-const cardRoutes = require('./routes/cards');
+const routes = require('./routes/index');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
@@ -23,8 +22,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(userRoutes);
-app.use(cardRoutes);
+app.use(routes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Ошибка запроса' });
