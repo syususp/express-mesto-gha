@@ -11,11 +11,7 @@ exports.getUsers = async (req, res) => {
     const users = await User.find();
     res.json(users);
   } catch (error) {
-    if (error instanceof mongoose.Error.ValidationError) {
-      res.status(BAD_REQUEST).json({ message: 'Ошибка валидации' });
-    } else {
-      res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
-    }
+    res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
   }
 };
 
@@ -23,15 +19,9 @@ exports.getUserById = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const user = await User.findById(userId).orFail(
-      new mongoose.Error.DocumentNotFoundError(),
-    );
+    const user = await User.findById(userId).orFail();
     return res.json(user);
   } catch (error) {
-    if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(BAD_REQUEST).json({ message: 'Ошибка валидации' });
-    }
-
     if (error instanceof mongoose.Error.CastError) {
       return res
         .status(BAD_REQUEST)
@@ -70,35 +60,6 @@ exports.updateProfile = async (req, res) => {
       { name, about },
       { new: true, runValidators: true },
     );
-
-    if (!updatedUser) {
-      return res.status(NOT_FOUND).json({ message: 'Пользователь не найден' });
-    }
-
-    if (!name || name.length < 2) {
-      return res
-        .status(BAD_REQUEST)
-        .json({ message: 'Некорректное имя пользователя' });
-    }
-
-    if (name && name.length > 30) {
-      return res
-        .status(BAD_REQUEST)
-        .json({ message: 'Слишком длинное имя пользователя' });
-    }
-
-    if (about && about.length < 2) {
-      return res
-        .status(BAD_REQUEST)
-        .json({ message: 'Некорректная информация о пользователе' });
-    }
-
-    if (about && about.length > 30) {
-      return res
-        .status(BAD_REQUEST)
-        .json({ message: 'Слишком длинная информация о пользователе' });
-    }
-
     return res.json(updatedUser);
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {

@@ -2,6 +2,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const routes = require('./routes/index');
+const { NOT_FOUND } = require('./constants/errorStatuses');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
@@ -25,7 +26,7 @@ app.use((req, res, next) => {
 app.use(routes);
 
 app.use((req, res) => {
-  res.status(404).json({ message: 'Ошибка запроса' });
+  res.status(NOT_FOUND).json({ message: 'Ошибка запроса' });
 });
 
 app.listen(3000);
