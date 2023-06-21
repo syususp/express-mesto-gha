@@ -79,9 +79,7 @@ exports.updateAvatar = async (req, res) => {
       { avatar },
       { new: true, runValidators: true },
     );
-    if (!updatedUser) {
-      return res.status(NOT_FOUND).json({ message: 'Пользователь не найден' });
-    }
+
     return res.json(updatedUser);
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
