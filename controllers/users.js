@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
   SERVER_ERROR,
   NOT_FOUND,
   BAD_REQUEST,
+  UNAUTHORIZED,
 } = require('../constants/errorStatuses');
-const bcrypt = require('bcryptjs');
 
 exports.getUsers = async (req, res) => {
   try {
@@ -38,7 +40,13 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -94,6 +102,28 @@ exports.updateAvatar = async (req, res) => {
     if (error instanceof mongoose.Error.ValidationError) {
       return res.status(BAD_REQUEST).json({ message: 'Ошибка валидации' });
     }
+    return res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
+  }
+};
+
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(UNAUTHORIZED).json({ message: 'Неправильные почта или пароль' });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(UNAUTHORIZED).json({ message: 'Неправильные почта или пароль' });
+    }
+
+    const token = jwt.sign({ _id: user._id }, 'your-secret-key', { expiresIn: '7d' });
+
+    return res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'none' }).json({ token });
+  } catch (error) {
     return res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
   }
 };
