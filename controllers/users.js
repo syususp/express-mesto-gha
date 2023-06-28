@@ -5,6 +5,7 @@ const {
   NOT_FOUND,
   BAD_REQUEST,
 } = require('../constants/errorStatuses');
+const bcrypt = require('bcryptjs');
 
 exports.getUsers = async (req, res) => {
   try {
@@ -37,10 +38,18 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
   try {
-    const user = await User.create({ name, about, avatar });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hashedPassword,
+    });
     return res.json(user);
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
