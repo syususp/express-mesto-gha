@@ -1,56 +1,53 @@
-const mongoose = require('mongoose');
 const Card = require('../models/card');
 const {
-  SERVER_ERROR,
   NOT_FOUND,
-  BAD_REQUEST,
   CREATED,
+  FORBIDDEN,
 } = require('../constants/errorStatuses');
 
-exports.getCards = async (req, res) => {
+exports.getCards = async (req, res, next) => {
   try {
     const cards = await Card.find();
-    res.json(cards);
+    return res.json(cards);
   } catch (error) {
-    res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
+    return next(error);
   }
 };
 
-exports.createCard = async (req, res) => {
+exports.createCard = async (req, res, next) => {
   const { name, link } = req.body;
   try {
     const card = await Card.create({ name, link, owner: req.user._id });
     return res.status(CREATED).json(card);
   } catch (error) {
-    if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(BAD_REQUEST).json({ message: 'Ошибка валидации' });
-    }
-    return res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
+    return next(error);
   }
 };
 
-exports.deleteCard = async (req, res) => {
+exports.deleteCard = async (req, res, next) => {
   const { cardId } = req.params;
-  try {
-    const deletedCard = await Card.findOneAndDelete({
-      _id: cardId,
-      owner: req.user._id,
-    });
+  const { _id } = req.user;
 
-    if (!deletedCard) {
+  try {
+    const card = await Card.findById(cardId);
+
+    if (!card) {
       return res.status(NOT_FOUND).json({ message: 'Карточка не найдена' });
     }
 
-    return res.json(deletedCard);
-  } catch (error) {
-    if (error instanceof mongoose.Error.CastError) {
-      return res.status(BAD_REQUEST).json({ message: 'Ошибка ID карточки' });
+    if (card.owner !== _id) {
+      return res.status(FORBIDDEN).json({ message: 'Нет прав на удаление карточки' });
     }
-    return res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
+
+    await Card.findByIdAndDelete(cardId);
+
+    return res.json({ message: 'Карточка удалена' });
+  } catch (error) {
+    return next(error);
   }
 };
 
-exports.likeCard = async (req, res) => {
+exports.likeCard = async (req, res, next) => {
   const { cardId } = req.params;
   const userId = req.user._id;
 
@@ -67,14 +64,11 @@ exports.likeCard = async (req, res) => {
 
     return res.json(updatedCard);
   } catch (error) {
-    if (error instanceof mongoose.Error.CastError) {
-      return res.status(BAD_REQUEST).json({ message: 'Ошибка ID карточки' });
-    }
-    return res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
+    return next(error);
   }
 };
 
-exports.unlikeCard = async (req, res) => {
+exports.unlikeCard = async (req, res, next) => {
   const { cardId } = req.params;
   const userId = req.user._id;
 
@@ -91,9 +85,6 @@ exports.unlikeCard = async (req, res) => {
 
     return res.json(updatedCard);
   } catch (error) {
-    if (error instanceof mongoose.Error.CastError) {
-      return res.status(BAD_REQUEST).json({ message: 'Ошибка ID карточки' });
-    }
-    return res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
+    return next(error);
   }
 };
