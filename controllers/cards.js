@@ -35,7 +35,7 @@ exports.deleteCard = async (req, res, next) => {
       return res.status(NOT_FOUND).json({ message: 'Карточка не найдена' });
     }
 
-    if (card.owner !== _id) {
+    if (card.owner.toString() !== _id) {
       return res.status(FORBIDDEN).json({ message: 'Нет прав на удаление карточки' });
     }
 
