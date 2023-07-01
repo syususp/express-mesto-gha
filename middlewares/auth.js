@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { UNAUTHORIZED } = require('../constants/errorStatuses');
 
+const { JWT_SECRET } = process.env;
+
 const auth = (req, res, next) => {
   const tokenString = req.headers.cookie || req.headers.authorization;
   let token;
@@ -18,7 +20,7 @@ const auth = (req, res, next) => {
   }
 
   try {
-    const payload = jwt.verify(token, 'super-secret-key');
+    const payload = jwt.verify(token, JWT_SECRET);
     req.user = payload;
     return next();
   } catch (error) {

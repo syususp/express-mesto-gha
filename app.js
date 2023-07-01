@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const express = require('express');
+require('dotenv').config();
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const {
@@ -11,8 +12,10 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
 
+const { HOST, PORT } = process.env;
+
 mongoose
-  .connect('mongodb://127.0.0.1:27017/mestodb', {
+  .connect(`mongodb://${HOST}:${PORT}/mestodb`, {
     useNewUrlParser: true,
   })
   .then(() => console.log('Connected to MongoDB'))

@@ -104,7 +104,7 @@ exports.login = async (req, res, next) => {
         .json({ message: 'Неправильные почта или пароль' });
     }
 
-    const token = jwt.sign({ _id: user._id }, 'super-secret-key', {
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     });
 
