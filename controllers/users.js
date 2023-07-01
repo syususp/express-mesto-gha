@@ -7,7 +7,7 @@ const {
   BAD_REQUEST,
 } = require('../constants/errorStatuses');
 
-// const { JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 exports.getUsers = async (req, res, next) => {
   try {
@@ -106,7 +106,7 @@ exports.login = async (req, res, next) => {
         .json({ message: 'Неправильные почта или пароль' });
     }
 
-    const token = jwt.sign({ _id: user._id }, 'super-secret-key', {
+    const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'super-secret-key', {
       expiresIn: '7d',
     });
 
