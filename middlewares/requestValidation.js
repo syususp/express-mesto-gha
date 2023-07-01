@@ -1,12 +1,11 @@
 const Joi = require('joi');
-const { BAD_REQUEST } = require('../constants/errorStatuses');
-const User = require('../models/user');
+const { BAD_REQUEST, CONFLICT } = require('../constants/errorStatuses');
 
-const validateRequest = (schema) => async (req, res, next) => {
+const validateRequest = (schema) => (req, res, next) => {
   const { error } = schema.validate(req.body, { abortEarly: false });
 
   if (error) {
-    return res.status(BAD_REQUEST).json({ message: 'Ошибка валидации', errors: error.details });
+    return res.status(BAD_REQUEST).json({ message: 'Ошибка валидации' });
   }
 
   return next();
@@ -17,13 +16,6 @@ const userSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
   avatar: Joi.string().uri(),
-}).custom(async (value) => {
-  const { email } = value;
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    throw new Error('Данный email уже зарегистрирован');
-  }
-  return value;
 });
 
 const cardSchema = Joi.object({
