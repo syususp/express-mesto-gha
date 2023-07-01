@@ -24,25 +24,25 @@ app.use(cookieParser());
 
 app.post(
   '/signin',
-  // celebrate({
-  //   body: Joi.object().keys({
-  //     email: Joi.string().email().required(),
-  //     password: Joi.string().required(),
-  //   }),
-  // }),
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+    }),
+  }),
   login,
 );
 
 app.post(
   '/signup',
-  // celebrate({
-  //   body: Joi.object().keys({
-  //     name: Joi.string().min(2).max(30).required(),
-  //     email: Joi.string().email().required(),
-  //     password: Joi.string().required(),
-  //     avatar: Joi.string().uri(),
-  //   }),
-  // }),
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30).required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+      avatar: Joi.string().uri(),
+    }),
+  }),
   createUser,
 );
 
