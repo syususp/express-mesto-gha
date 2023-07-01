@@ -37,6 +37,13 @@ app.post(
   login,
 );
 
+const linkValidation = (value, helpers) => {
+  if (value.startsWith('link:')) {
+    return helpers.error('any.invalid');
+  }
+  return value;
+};
+
 app.post(
   '/signup',
   celebrate({
@@ -45,7 +52,7 @@ app.post(
         name: Joi.string().min(2).max(30),
         email: Joi.string().email().required(),
         password: Joi.string().required(),
-        avatar: Joi.string().uri(),
+        avatar: Joi.string().custom(linkValidation),
         about: Joi.string().min(2).max(30),
       })
       .unknown(true),
