@@ -26,35 +26,40 @@ exports.getUserById = async (req, res, next) => {
   }
 };
 
-exports.createUser = async (req, res, next) => {
-  const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
-  } = req.body;
+const { validateUserRequest } = require('../middlewares/requestValidation');
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
+exports.createUser = [
+  validateUserRequest,
+  async (req, res, next) => {
+    const {
       name,
       about,
       avatar,
       email,
-      password: hashedPassword,
-    });
+      password,
+    } = req.body;
 
-    return res.status(CREATED).json(user);
-  } catch (error) {
-    if (error.name === 'ValidationError') {
-      const errorMessages = Object.values(error.errors).map((err) => err.message);
-      return res.status(400).json({ message: 'Validation error', errors: errorMessages });
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const user = await User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hashedPassword,
+      });
+
+      return res.status(CREATED).json(user);
+    } catch (error) {
+      if (error.name === 'ValidationError') {
+        const errorMessages = error.details.map((err) => err.message);
+        return res.status(400).json({ message: 'Validation error', errors: errorMessages });
+      }
+      return next(error);
     }
-    return next(error);
-  }
-};
+  },
+];
 
 exports.updateProfile = async (req, res, next) => {
   const { name, about } = req.body;
