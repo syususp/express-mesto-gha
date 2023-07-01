@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
   UNAUTHORIZED,
+  CREATED,
 } = require('../constants/errorStatuses');
 
 exports.getUsers = async (req, res, next) => {
@@ -44,8 +45,13 @@ exports.createUser = async (req, res, next) => {
       email,
       password: hashedPassword,
     });
-    return res.json(user);
+
+    return res.status(CREATED).json(user);
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      const errorMessages = Object.values(error.errors).map((err) => err.message);
+      return res.status(400).json({ message: 'Validation error', errors: errorMessages });
+    }
     return next(error);
   }
 };
