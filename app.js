@@ -12,10 +12,10 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
 
-const { DB_URL } = process.env;
+const { NODE_ENV, DB_URL } = process.env;
 
 mongoose
-  .connect(`${DB_URL}/mestodb`, {
+  .connect(`${NODE_ENV === 'production' ? DB_URL : 'mongodb://127.0.0.1:27017'}/mestodb`, {
     useNewUrlParser: true,
   })
   .then(() => console.log('Connected to MongoDB'))
