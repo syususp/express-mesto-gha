@@ -2,12 +2,13 @@ const jwt = require('jsonwebtoken');
 const { UNAUTHORIZED } = require('../constants/errorStatuses');
 
 const auth = (req, res, next) => {
-  const tokenRaw = req.headers.cookie;
-  const token = tokenRaw.replace('token=', '');
+  const tokenString = req.headers.cookie;
 
-  if (!token) {
+  if (!tokenString) {
     return res.status(UNAUTHORIZED).json({ message: 'Ошибка авторизации' });
   }
+
+  const token = tokenString.replace('token=', '');
 
   try {
     const payload = jwt.verify(token, 'super-secret-key');
