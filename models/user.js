@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     validate: {
       validator: (v) => {
-        const regex = /^https?:\/\/w?w?w?\.[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+$/;
+        const regex = /^https?:\/\/(w{3}\.)?[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+$/;
         return regex.test(v);
       },
       message: 'Некорректная ссылка на аватар',

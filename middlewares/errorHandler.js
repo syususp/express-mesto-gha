@@ -31,7 +31,7 @@ const errorHandler = (err, req, res, next) => {
     return res.status(UNAUTHORIZED).json({ message: 'Недействительный токен' });
   }
 
-  return res.status(SERVER_ERROR).json({ message: 'Ошибка сервера' });
+  return res.status(SERVER_ERROR).json({ message: err.message });
 };
 
 module.exports = errorHandler;
