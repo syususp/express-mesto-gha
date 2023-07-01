@@ -5,7 +5,7 @@ const auth = (req, res, next) => {
   const tokenString = req.headers.cookie;
 
   if (!tokenString) {
-    return res.status(UNAUTHORIZED).json({ message: 'Ошибка авторизации' });
+    return res.status(UNAUTHORIZED).json({ message: 'Ошибка авторизации:', tokenString });
   }
 
   const token = tokenString.replace('token=', '');
@@ -15,7 +15,7 @@ const auth = (req, res, next) => {
     req.user = payload;
     return next();
   } catch (error) {
-    return res.status(UNAUTHORIZED).json({ message: 'Ошибка авторизации.' });
+    return res.status(UNAUTHORIZED).json({ message: 'Ошибка авторизации.', error });
   }
 };
 
