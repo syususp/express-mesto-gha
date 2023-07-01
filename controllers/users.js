@@ -1,10 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  UNAUTHORIZED,
-  CREATED,
-} = require('../constants/errorStatuses');
+const { UNAUTHORIZED, CREATED, BAD_REQUEST } = require('../constants/errorStatuses');
 
 exports.getUsers = async (req, res, next) => {
   try {
@@ -26,33 +23,28 @@ exports.getUserById = async (req, res, next) => {
   }
 };
 
-exports.createUser = [
-  async (req, res, next) => {
-    const {
+exports.createUser = async (req, res, next) => {
+  const { name, about, avatar, email, password } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
       name,
       about,
       avatar,
       email,
-      password,
-    } = req.body;
+      password: hashedPassword,
+    });
 
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const user = await User.create({
-        name,
-        about,
-        avatar,
-        email,
-        password: hashedPassword,
-      });
-
-      return res.status(CREATED).json(user);
-    } catch (error) {
-      return next(error);
+    return res.status(CREATED).json(user);
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(BAD_REQUEST).json({ message: error.message });
     }
-  },
-];
+    return next(error);
+  }
+};
 
 exports.updateProfile = async (req, res, next) => {
   const { name, about } = req.body;
