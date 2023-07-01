@@ -26,10 +26,7 @@ exports.getUserById = async (req, res, next) => {
   }
 };
 
-const { validateUserRequest } = require('../middlewares/requestValidation');
-
 exports.createUser = [
-  validateUserRequest,
   async (req, res, next) => {
     const {
       name,
