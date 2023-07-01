@@ -1,17 +1,19 @@
 const Joi = require('joi');
-const { BAD_REQUEST, CONFLICT } = require('../constants/errorStatuses');
+const { BAD_REQUEST } = require('../constants/errorStatuses');
 
 const validateRequest = (schema) => (req, res, next) => {
   const { error } = schema.validate(req.body, { abortEarly: false });
 
   if (error) {
-    return res.status(BAD_REQUEST).json({ message: 'Ошибка валидации' });
+    const validationErrors = error.details.map((detail) => detail.message);
+    return res.status(BAD_REQUEST).json({ message: 'Ошибка валидации', errors: validationErrors });
   }
 
   return next();
 };
 
 const userSchema = Joi.object({
+  about: Joi.string(),
   name: Joi.string().min(2).max(30),
   email: Joi.string().email().required(),
   password: Joi.string().required(),

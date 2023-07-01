@@ -52,10 +52,6 @@ exports.createUser = [
 
       return res.status(CREATED).json(user);
     } catch (error) {
-      if (error.name === 'ValidationError') {
-        const errorMessages = error.details.map((err) => err.message);
-        return res.status(400).json({ message: 'Validation error', errors: errorMessages });
-      }
       return next(error);
     }
   },

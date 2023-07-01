@@ -7,7 +7,8 @@ const {
   CONFLICT,
 } = require('../constants/errorStatuses');
 
-const errorHandler = (err, req, res) => {
+// eslint-disable-next-line no-unused-vars
+const errorHandler = (err, req, res, next) => {
   if (err instanceof mongoose.Error.ValidationError) {
     return res.status(BAD_REQUEST).json({ message: err.message });
   }
