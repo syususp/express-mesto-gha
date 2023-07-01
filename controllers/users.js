@@ -41,8 +41,9 @@ exports.createUser = async (req, res, next) => {
       avatar,
       email,
       password: hashedPassword,
-    }).select('-password');
+    });
 
+    user.password = undefined;
     return res.status(CREATED).json(user);
   } catch (error) {
     if (error.name === 'ValidationError') {
