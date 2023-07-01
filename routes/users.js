@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.get('/', getUsers);
 router.get('/me', getUserInfo);
-router.get('/:userId', celebrate({ [Segments.PARAMS]: Joi.object({ userId: Joi.string().required() }) }), getUserById);
+router.get('/:userId', celebrate({ [Segments.PARAMS]: Joi.object({ userId: Joi.string().alphanum().required() }) }), getUserById);
 router.patch('/me', celebrate({ [Segments.BODY]: Joi.object({ name: Joi.string().min(2).max(30), about: Joi.string() }) }), updateProfile);
 router.patch('/me/avatar', celebrate({ [Segments.BODY]: Joi.object({ avatar: Joi.string().uri() }) }), updateAvatar);
 
