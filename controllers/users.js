@@ -1,7 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { UNAUTHORIZED, CREATED, BAD_REQUEST } = require('../constants/errorStatuses');
+const {
+  UNAUTHORIZED,
+  CREATED,
+  BAD_REQUEST,
+} = require('../constants/errorStatuses');
 
 exports.getUsers = async (req, res, next) => {
   try {
@@ -24,7 +28,9 @@ exports.getUserById = async (req, res, next) => {
 };
 
 exports.createUser = async (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -110,7 +116,7 @@ exports.login = async (req, res, next) => {
 };
 
 exports.getUserInfo = async (req, res, next) => {
-  const { _id } = req.user;
+  const { _id } = req.body;
 
   try {
     const user = await User.findById(_id);

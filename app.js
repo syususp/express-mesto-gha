@@ -2,7 +2,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const { celebrate, Joi, Segments, errors } = require('celebrate');
+const {
+  celebrate, Joi, Segments, errors,
+} = require('celebrate');
 const routes = require('./routes/index');
 const { NOT_FOUND } = require('./constants/errorStatuses');
 const { login, createUser } = require('./controllers/users');
@@ -25,10 +27,12 @@ app.use(cookieParser());
 app.post(
   '/signin',
   celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      email: Joi.string().email().required(),
-      password: Joi.string().required(),
-    }).unknown(true),
+    [Segments.BODY]: Joi.object()
+      .keys({
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+      })
+      .unknown(true),
   }),
   login,
 );
@@ -36,13 +40,15 @@ app.post(
 app.post(
   '/signup',
   celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      name: Joi.string().min(2).max(30),
-      email: Joi.string().email().required(),
-      password: Joi.string().required(),
-      avatar: Joi.string().uri(),
-      about: Joi.string().min(2).max(30),
-    }).unknown(true),
+    [Segments.BODY]: Joi.object()
+      .keys({
+        name: Joi.string().min(2).max(30),
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+        avatar: Joi.string().uri(),
+        about: Joi.string().min(2).max(30),
+      })
+      .unknown(true),
   }),
   createUser,
 );
