@@ -41,7 +41,7 @@ exports.createUser = async (req, res, next) => {
       avatar,
       email,
       password: hashedPassword,
-    });
+    }).select('-password');
 
     return res.status(CREATED).json(user);
   } catch (error) {
@@ -116,7 +116,7 @@ exports.login = async (req, res, next) => {
 };
 
 exports.getUserInfo = async (req, res, next) => {
-  const { _id } = req.body;
+  const { _id } = req.user;
 
   try {
     const user = await User.findById(_id);
