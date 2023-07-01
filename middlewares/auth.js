@@ -2,10 +2,11 @@ const jwt = require('jsonwebtoken');
 const { UNAUTHORIZED } = require('../constants/errorStatuses');
 
 const auth = (req, res, next) => {
-  const token = req.headers.cookie.replace('token=', '');
+  const tokenRaw = req.headers.cookie;
+  const token = tokenRaw.replace('token=', '');
 
   if (!token) {
-    return res.status(UNAUTHORIZED).json({ message: 'Ошибка авторизации, блок 1' });
+    return res.status(UNAUTHORIZED).json({ message: 'Ошибка авторизации' });
   }
 
   try {
@@ -13,7 +14,7 @@ const auth = (req, res, next) => {
     req.user = payload;
     return next();
   } catch (error) {
-    return res.status(UNAUTHORIZED).json({ message: 'Ошибка авторизации, блок 2' });
+    return res.status(UNAUTHORIZED).json({ message: 'Ошибка авторизации.' });
   }
 };
 
