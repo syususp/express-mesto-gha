@@ -14,7 +14,7 @@ const errorHandler = (err, req, res, next) => {
   }
 
   if (err instanceof mongoose.Error.CastError) {
-    return res.status(BAD_REQUEST).json({ message: 'Ошибка ID' });
+    return res.status(BAD_REQUEST).json({ message: 'Ошибка ID', err });
   }
 
   if (err instanceof mongoose.Error.DocumentNotFoundError) {
