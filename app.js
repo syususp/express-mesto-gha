@@ -11,6 +11,7 @@ const { NOT_FOUND } = require('./constants/errorStatuses');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { NODE_ENV, DB_URL } = process.env;
 
@@ -26,6 +27,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use(requestLogger);
 
 app.post(
   '/signin',
@@ -65,6 +68,7 @@ app.post(
 
 app.use(auth);
 app.use(routes);
+app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
 
